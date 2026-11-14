@@ -113,7 +113,7 @@ const PAGES = {
     <p>${esc(SITE.venue)}</p>
     <ul class="plain-list">${GROUPS.map((g) => `<li><a href="${groupUrl(g)}">${esc(g.name)}</a></li>`).join("")}</ul>
     <h2>ポスター発表会場</h2>
-    <p>${esc(TALK.place)}で<a href="#lectures">ポスター発表</a>を行います。</p>
+    <p>${esc(SITE.room)}で<a href="#lectures">ポスター発表</a>を行います。</p>
     <h2>開催日</h2>
     <p>${esc(SITE.dates)}</p>
     <p class="note">${esc(SITE.footerNote)}</p>`;
@@ -136,7 +136,7 @@ const PAGES = {
     document.title = `ポスター発表 - ${SITE.name}`;
     return `
     <h1>ポスター発表</h1><hr>
-    <p>${esc(TALK.place)}にて、ポスター発表を行います。</p>
+    <p>${esc(SITE.room)}にて、ポスター発表を行います。</p>
     ${shareButton()}
     ${DAYS.map((d, i) => `<h2>${i + 1}日目(${esc(d)})</h2><p class="note">調整中です。</p>`).join("")}
     <h2>注意事項</h2>

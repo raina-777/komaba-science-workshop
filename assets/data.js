@@ -6,7 +6,7 @@ const SITE = {
   dates: "11月21日(土)〜23日(月・祝)",
   venue: "第77回駒場祭(東京大学 駒場キャンパス)1225教室",
   room: "1225教室",
-  intro: "Komaba Science Workshop(KSW)は学生有志による学術系の展示企画で、第77回駒場祭に出展します。ポスター発表や、ゲストをお招きしたトークセッションを予定しています。",
+  intro: "Komaba Science Workshop(KSW)は学生有志による学術系の展示企画で、第77回駒場祭に出展します。ポスター発表を予定しています。",
   hashtag: "KomabaScienceWorkshop",
   surveyUrl: "", // アンケートのURL。空の間はボタンが「準備中」になります。
   sns: { label: "", url: "" }, // 例: { label: "@your_account", url: "https://x.com/your_account" }
@@ -50,16 +50,6 @@ const LECTURES = [
   { id: "quantum", day: 1, start: "10:00", end: "10:45", title: "はじめての量子論", speaker: "発表者D(4年)", abstract: "重ね合わせや測定といった基本的な考え方を、身近なたとえと実験結果から説明します。" },
   { id: "career", day: 1, start: "11:30", end: "12:15", title: "物理学科での学び", speaker: "発表者E(3年)", abstract: "物理学科ではどんなことを学ぶのか。授業や実験の様子を在学生の視点で紹介します。" },
 ];
-
-const TALK = {
-  id: "talk", day: 1, start: "14:00", end: "15:30",
-  title: "トークセッション with ゲスト",
-  guest: "ゲスト名(肩書き)",
-  abstract: "研究の面白さや進路の選び方について、ゲストと学生が語り合います。受験を控えた高校生や、進路を考えている大学生に特におすすめです。",
-  place: SITE.room,
-  notes: ["参加無料・事前申込不要です。", "満席の場合は入場をお待ちいただくことがあります。"],
-  archiveUrl: "", // アーカイブ動画のURL。空なら表示されません。
-};
 
 const DAYS = ["21日(土)", "22日(日)", "23日(月・祝)"];
 
