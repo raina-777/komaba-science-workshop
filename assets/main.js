@@ -108,7 +108,7 @@ const PAGES = {
     <p>${esc(SITE.intro)}</p>
     ${shareButton()}
     <h2>展示について</h2>
-    <p>${esc(SITE.room)}でポスター発表と展示を行います。ポスターは、中高生にも分かるように作っています。作成者が会場で解説しますので、気になることがあればお気軽にご質問ください。</p>
+    <p>${esc(SITE.room)}でポスター発表と展示を行います。作成者が会場で解説しますので、気になることがあればお気軽にご質問ください。</p>
     <h2>展示会場</h2>
     <p>${esc(SITE.venue)}</p>
     <ul class="plain-list">${GROUPS.map((g) => `<li><a href="${groupUrl(g)}">${esc(g.name)}</a></li>`).join("")}</ul>
