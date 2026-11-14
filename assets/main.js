@@ -28,7 +28,7 @@ function renderHeader(page) {
     <nav class="nav" id="nav" aria-label="メインメニュー">
       ${link("#top", "トップ", "top")}
       ${link("#about", "このイベントについて", "about")}
-      ${link("#lectures", "学生講演", "lectures")}
+      ${link("#lectures", "ポスター発表", "lectures")}
     </nav>
   </header>`;
 
@@ -108,12 +108,12 @@ const PAGES = {
     <p>${esc(SITE.intro)}</p>
     ${shareButton()}
     <h2>展示について</h2>
-    <p>${esc(SITE.room)}でポスター発表と展示を行います。ポスターと学生講演は、中高生にも分かるように作っています。作成者が会場で解説しますので、気になることがあればお気軽にご質問ください。</p>
+    <p>${esc(SITE.room)}でポスター発表と展示を行います。ポスターは、中高生にも分かるように作っています。作成者が会場で解説しますので、気になることがあればお気軽にご質問ください。</p>
     <h2>展示会場</h2>
     <p>${esc(SITE.venue)}</p>
     <ul class="plain-list">${GROUPS.map((g) => `<li><a href="${groupUrl(g)}">${esc(g.name)}</a></li>`).join("")}</ul>
-    <h2>講演会場</h2>
-    <p>${esc(TALK.place)}で<a href="#lectures">学生講演</a>を行います。</p>
+    <h2>ポスター発表会場</h2>
+    <p>${esc(TALK.place)}で<a href="#lectures">ポスター発表</a>を行います。</p>
     <h2>開催日</h2>
     <p>${esc(SITE.dates)}</p>
     <p class="note">${esc(SITE.footerNote)}</p>`;
@@ -133,10 +133,10 @@ const PAGES = {
   },
 
   lectures() {
-    document.title = `学生講演 - ${SITE.name}`;
+    document.title = `ポスター発表 - ${SITE.name}`;
     return `
-    <h1>学生講演</h1><hr>
-    <p>${esc(TALK.place)}にて、学生による講演を行います。</p>
+    <h1>ポスター発表</h1><hr>
+    <p>${esc(TALK.place)}にて、ポスター発表を行います。</p>
     ${shareButton()}
     ${DAYS.map((d, i) => `<h2>${i + 1}日目(${esc(d)})</h2><p class="note">調整中です。</p>`).join("")}
     <h2>注意事項</h2>
