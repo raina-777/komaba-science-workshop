@@ -1,43 +1,23 @@
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const safeUrl = (u) => (/^https?:\/\//i.test(u) ? esc(u) : "#");
-const groupUrl = (g) => `#group-${g.id}`;
+// http(s) の URL か、サイト内の相対パス(assets/posters/1.pdf など)だけを許可
+const safeUrl = (u) => (/^https?:\/\//i.test(u) || /^\w[\w./-]*$/.test(u) ? esc(u) : "#");
 
 const ICONS = {
-  info: '<circle cx="24" cy="24" r="18"/><path d="M24 22v12M24 14v2"/>',
   chart: '<path d="M6 42h36M6 42V6"/><path d="M12 34l8-10 7 5 13-17"/>',
   planet: '<circle cx="24" cy="24" r="11"/><ellipse cx="24" cy="24" rx="21" ry="6" transform="rotate(-20 24 24)"/>',
   atom: '<circle cx="24" cy="24" r="2.5"/><ellipse cx="24" cy="24" rx="20" ry="8"/><ellipse cx="24" cy="24" rx="20" ry="8" transform="rotate(60 24 24)"/><ellipse cx="24" cy="24" rx="20" ry="8" transform="rotate(120 24 24)"/>',
   cell: '<path d="M14 5c0 10 20 10 20 19s-20 9-20 19M34 5c0 10-20 10-20 19s20 9 20 19"/><path d="M17 11h14M17 37h14"/>',
   sigma: '<path d="M38 10V6H10l15 18-15 18h28v-4"/>',
   dots: '<circle cx="11" cy="12" r="3"/><circle cx="26" cy="9" r="3"/><circle cx="38" cy="18" r="3"/><circle cx="18" cy="24" r="3"/><circle cx="32" cy="30" r="3"/><circle cx="10" cy="37" r="3"/><circle cx="24" cy="39" r="3"/>',
-  mic: '<rect x="17" y="5" width="14" height="24" rx="7"/><path d="M10 22a14 14 0 0 0 28 0M24 36v7M16 43h16"/>',
 };
 
-const icon = (name, cls = "") => `<svg class="${cls}" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+const icon = (name) => `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.dots}</svg>`;
 
-const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
-
-function renderHeader(page) {
-  const link = (href, label, key) => `<a class="nav-link${page === key ? " is-current" : ""}" href="${href}"${page === key ? ' aria-current="page"' : ""}>${label}</a>`;
+function renderHeader() {
   document.getElementById("header").innerHTML = `
   <header class="site-header">
-    <a class="logo" href="#top"><img src="assets/ksw-logo.png" width="1000" height="393" alt="Komaba Science Workshop"></a>
-    <button class="menu-button" id="menu-button" aria-expanded="false" aria-controls="nav" aria-label="メニュー">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-    </button>
-    <nav class="nav" id="nav" aria-label="メインメニュー">
-      ${link("#top", "トップ", "top")}
-      ${link("#about", "このイベントについて", "about")}
-      ${link("#lectures", "ポスター発表", "lectures")}
-    </nav>
+    <a class="logo" href="#top"><img src="assets/ksw-logo.png" width="1000" height="393" alt="${esc(SITE.name)}"></a>
   </header>`;
-
-  const menuBtn = document.getElementById("menu-button");
-  const nav = document.getElementById("nav");
-  menuBtn.addEventListener("click", () => {
-    const open = nav.classList.toggle("is-open");
-    menuBtn.setAttribute("aria-expanded", open);
-  });
 }
 
 function renderFooter() {
@@ -49,113 +29,55 @@ function renderFooter() {
   </footer>`;
 }
 
-function shareButton() {
-  const url = encodeURIComponent(location.href);
-  const text = encodeURIComponent(document.title);
-  const tag = encodeURIComponent(SITE.hashtag);
-  return `<a class="share" target="_blank" rel="noopener noreferrer" href="https://x.com/intent/post?url=${url}&text=${text}&hashtags=${tag}">Xで共有</a>`;
-}
-
-function card({ href, title, sub, ic }) {
-  return `<a class="card" href="${href}">
-    <div class="card-visual"><div class="card-top"><span>${esc(title)}</span>${icon(ic)}</div><div class="card-bottom">${esc(sub)}</div></div>
-    <div class="card-title">${esc(title)}</div>
-  </a>`;
-}
-
-const TT_START_HOUR = 9;
-const TT_HOURS = 10;
-
-function timetableEvents() {
-  return '<p class="tt-empty">調整中です</p>';
-}
-
-function timetable() {
-  const ticks = Array.from({ length: TT_HOURS }, (_, i) => `<div class="tt-hour">${TT_START_HOUR + i}:00</div>`).join("");
+function poster(p, i) {
+  const thumb = p.image ? `<img src="${safeUrl(p.image)}" alt="" width="96" height="96">` : icon(p.icon);
+  const title = p.pdf
+    ? `<a href="${safeUrl(p.pdf)}" target="_blank" rel="noopener noreferrer">${esc(p.title)}<span class="pdf-tag">PDF</span></a>`
+    : esc(p.title);
+  const labels = p.labels.length
+    ? `<ul class="labels" aria-label="ラベル">${p.labels.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>`
+    : "";
   return `
-  <div class="timetable">
-    <div class="tt-tabs" role="tablist" aria-label="開催日">
-      ${DAYS.map((d, i) => `<button role="tab" id="tt-tab-${i}" aria-controls="tt-panel" aria-selected="${i === 0}" class="tt-tab">${esc(d)}</button>`).join("")}
+  <details class="poster" id="poster-${i + 1}">
+    <summary>
+      <span class="poster-thumb">${thumb}</span>
+      <span class="poster-name">${esc(p.title)}</span>
+      <svg class="poster-chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.2 7.2a.75.75 0 0 1 1.1 0l3.7 4 3.7-4a.75.75 0 1 1 1.1 1l-4.3 4.6a.75.75 0 0 1-1 0L5.2 8.3a.75.75 0 0 1 0-1z"/></svg>
+    </summary>
+    <div class="poster-body">
+      <h3>${title}</h3>
+      ${labels}
+      <p class="summary"><strong>概要:</strong>${p.summary ? esc(p.summary) : '<span class="note">準備中です。</span>'}</p>
     </div>
-    <div class="tt-body">
-      <div class="tt-hours">${ticks}</div>
-      <div class="tt-panel" id="tt-panel" role="tabpanel" aria-labelledby="tt-tab-0" style="height:${TT_HOURS * 60}px">${timetableEvents(0)}</div>
-    </div>
-  </div>`;
+  </details>`;
 }
 
-function bindTimetable() {
-  const panel = document.getElementById("tt-panel");
-  const tabs = [...document.querySelectorAll(".tt-tab")];
-  tabs.forEach((tab, day) => tab.addEventListener("click", () => {
-    tabs.forEach((t, i) => t.setAttribute("aria-selected", i === day));
-    panel.setAttribute("aria-labelledby", `tt-tab-${day}`);
-    panel.innerHTML = timetableEvents(day);
-  }));
-}
+function renderMain() {
+  document.title = SITE.name;
+  const f = SITE.festival;
+  document.getElementById("main").innerHTML = `
+  <h1>${esc(SITE.name)}</h1>
 
-const PAGES = {
-  top() {
-    const html = PAGES.about();
-    document.title = SITE.name;
-    return html;
-  },
-
-  about() {
-    document.title = `このイベントについて - ${SITE.name}`;
-    return `
-    <h1>${esc(SITE.name)} とは</h1><hr>
+  <section>
+    <h2>企画概要</h2>
     <p>${esc(SITE.intro)}</p>
-    ${shareButton()}
-    <h2>展示について</h2>
-    <p>${esc(SITE.room)}でポスター発表と展示を行います。作成者が会場で解説しますので、気になることがあればお気軽にご質問ください。</p>
-    <h2>展示会場</h2>
-    <p>${esc(SITE.venue)}</p>
-    <ul class="plain-list">${GROUPS.map((g) => `<li><a href="${groupUrl(g)}">${esc(g.name)}</a></li>`).join("")}</ul>
-    <h2>ポスター発表会場</h2>
-    <p>${esc(SITE.room)}で<a href="#lectures">ポスター発表</a>を行います。</p>
-    <h2>開催日</h2>
-    <p>${esc(SITE.dates)}</p>
-    <p class="note">${esc(SITE.footerNote)}</p>`;
-  },
+  </section>
 
-  group(id) {
-    const g = GROUPS.find((x) => x.id === id);
-    if (!g) return PAGES.top();
-    document.title = `${g.name} - ${SITE.name}`;
-    return `
-    <h1>${esc(g.name)}</h1><hr>
-    ${g.summary ? `<p>${esc(g.summary)}</p>` : ""}
-    <p><strong>展示場所:</strong>${esc(g.place)}</p>
-    ${shareButton()}
-    <h2>展示内容</h2>
-    <div class="topics">${g.topics.map(([t, d]) => `<section class="topic"><h3>${esc(t)}</h3><p>${esc(d)}</p></section>`).join("")}</div>`;
-  },
+  <section>
+    <h2>企画情報</h2>
+    <dl class="info">
+      <dt>開催日</dt><dd>${esc(SITE.dates)}</dd>
+      <dt>会場</dt><dd>${esc(SITE.venue)}</dd>
+      <dt>駒場祭 website</dt><dd><a href="${safeUrl(f.url)}" target="_blank" rel="noopener noreferrer">${esc(f.label)}</a></dd>
+    </dl>
+  </section>
 
-  lectures() {
-    document.title = `ポスター発表 - ${SITE.name}`;
-    return `
-    <h1>ポスター発表</h1><hr>
-    <p>${esc(SITE.room)}にて、ポスター発表を行います。</p>
-    ${shareButton()}
-    ${DAYS.map((d, i) => `<h2>${i + 1}日目(${esc(d)})</h2><p class="note">調整中です。</p>`).join("")}
-    <h2>注意事項</h2>
-    <p class="note">${esc(SITE.footerNote)}</p>`;
-  },
-};
-
-// #group-astrophysics → ページ "group"、引数 "astrophysics"
-function route() {
-  const [name, ...rest] = location.hash.slice(1).split("-");
-  const page = Object.hasOwn(PAGES, name) ? name : "top";
-  const arg = rest.join("-");
-  renderHeader(page);
-  document.getElementById("main").innerHTML = PAGES[page](arg);
-  if (document.getElementById("tt-panel")) bindTimetable();
-  window.scrollTo(0, 0);
+  <section>
+    <h2>ポスター一覧</h2>
+    <div class="posters">${POSTERS.map(poster).join("")}</div>
+  </section>`;
 }
 
-window.addEventListener("hashchange", route);
-
+renderHeader();
+renderMain();
 renderFooter();
-route();
